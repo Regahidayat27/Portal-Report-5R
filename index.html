@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal Report 5R - PT Lelco Trindo Nusantara</title>
+  
+  <link rel="icon" type="image/png" href="logo-lelco.png">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="toast"></div>
+
+  <!-- TICKER ANNOUNCEMENT BAR -->
+  <div class="announcement-bar">
+    <i class="fa-solid fa-bullhorn"></i> <strong>INFO 5R:</strong> Target Bulan Ini: Penataan Kabel Tray & Zero Ceceran Oli di Area Produksi.
+  </div>
+
+  <!-- HEADER & NAVIGATION -->
+  <header class="main-header">
+    <div class="header-content">
+      <img src="logo-lelco.png" alt="Logo Lelco" class="brand-logo">
+      <div class="logo-title">
+        <h2>PT. LELCO TRINDO NUSANTARA</h2>
+        <p>PORTAL INSPEKSI & REPORT 5R - STANDAR MANUFAKTUR INDUSTRI</p>
+      </div>
+      <button class="theme-toggle" onclick="toggleTheme()" title="Ganti Tema">
+        <i class="fa-solid fa-moon" id="themeIcon"></i>
+      </button>
+    </div>
+    
+    <!-- MENU TAB NAVIGASI TERSTRUKTUR -->
+    <nav class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab('tabHome', this)"><i class="fa-solid fa-house"></i> 1. Beranda</button>
+      <button class="tab-btn" onclick="switchTab('tabForm', this)"><i class="fa-solid fa-pen-to-square"></i> 2. Form Input</button>
+      <button class="tab-btn" onclick="switchTab('tabPanduan', this)"><i class="fa-solid fa-images"></i> 3. Panduan Visual 5R</button>
+      <button class="tab-btn" onclick="switchTab('tabRedTag', this)"><i class="fa-solid fa-tag"></i> 4. Red Tag System</button>
+      <button class="tab-btn" onclick="switchTab('tabRekapan', this)"><i class="fa-solid fa-table-list"></i> 5. Rekapan Data</button>
+      <button class="tab-btn" onclick="switchTab('tabDashboard', this)"><i class="fa-solid fa-chart-pie"></i> 6. Analytics</button>
+    </nav>
+  </header>
+
+  <main class="container">
+    
+    <!-- TAB 1: BERANDA / HOME -->
+    <div id="tabHome" class="tab-content active">
+      <section class="hero-card">
+        <div class="hero-text">
+          <span class="hero-badge"><i class="fa-solid fa-shield-halved"></i> Engineering Quality Control</span>
+          <h2>Budayakan 5R untuk Area Kerja Aman, Rapi, dan Efisien</h2>
+          <p>Selamat datang di Portal Digital Pelaporan Inspeksi 5R PT Lelco Trindo Nusantara. Laporkan temuan ketidaksesuaian atau hasil perbaikan di area kerja Anda secara langsung.</p>
+          <div class="hero-buttons">
+            <button class="btn-hero-primary" onclick="goToTab('tabForm', 1)"><i class="fa-solid fa-plus-circle"></i> Buat Laporan Baru</button>
+            <button class="btn-hero-secondary" onclick="goToTab('tabPanduan', 2)"><i class="fa-solid fa-images"></i> Lihat Galeri Panduan 5R</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="kpi-grid" style="margin-top: 20px;">
+        <div class="kpi-card border-blue">
+          <div class="kpi-info">
+            <span>Total Temuan</span>
+            <h3 id="homeStatTotal">0</h3>
+          </div>
+          <i class="fa-solid fa-clipboard-list kpi-icon text-blue"></i>
+        </div>
+        <div class="kpi-card border-red">
+          <div class="kpi-info">
+            <span>Perlu Tindakan (Open)</span>
+            <h3 id="homeStatOpen">0</h3>
+          </div>
+          <i class="fa-solid fa-triangle-exclamation kpi-icon text-red"></i>
+        </div>
+        <div class="kpi-card border-green">
+          <div class="kpi-info">
+            <span>Selesai (Closed)</span>
+            <h3 id="homeStatClosed">0</h3>
+          </div>
+          <i class="fa-solid fa-circle-check kpi-icon text-green"></i>
+        </div>
+      </section>
+
+      <div class="home-grid-2" style="margin-top: 20px;">
+        <section class="card-data">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-clock-rotate-left"></i> Aktivitas Laporan Terbaru</h3>
+          </div>
+          <div id="recentActivityList" class="activity-feed">
+            <p class="text-center">Belum ada aktivitas pelaporan terbaru.</p>
+          </div>
+        </section>
+
+        <section class="card-data">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-trophy"></i> Leaderboard Area Aktif</h3>
+          </div>
+          <div id="leaderboardList" class="leaderboard-feed">
+            <p class="text-center">Belum ada peringkat area.</p>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- TAB 2: FORM INPUT -->
+    <div id="tabForm" class="tab-content">
+      <section class="card-form">
+        <div class="card-header">
+          <h3><i class="fa-solid fa-pen-to-square"></i> Form Input Temuan 5R</h3>
+          <span class="badge-live"><i class="fa-solid fa-signal"></i> Live System</span>
+        </div>
+
+        <form id="form5R">
+          <div class="form-grid-3">
+            <div class="input-group">
+              <label for="tglInspeksi"><i class="fa-solid fa-calendar-days"></i> Tanggal Inspeksi <span>*</span></label>
+              <input type="date" id="tglInspeksi" required>
+            </div>
+
+            <div class="input-group">
+              <label for="deptPelapor"><i class="fa-solid fa-sitemap"></i> Departemen Pelapor <span>*</span></label>
+              <select id="deptPelapor" required onchange="saveDraft()">
+                <option value="">-- Pilih Departemen --</option>
+                <option value="Engineering">Engineering</option>
+                <option value="Produksi (Line A/B)">Produksi</option>
+                <option value="Maintenance & Utility">Maintenance & Utility</option>
+                <option value="Quality Control (QC/QA)">Quality Control (QC/QA)</option>
+                <option value="Logistik & Warehouse">Logistik & Warehouse</option>
+                <option value="EHS / HSE Safety">EHS / HSE Safety</option>
+                <option value="PPIC">PPIC</option>
+                <option value="General Affair (GA)">General Affair (GA)</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label for="area"><i class="fa-solid fa-location-dot"></i> Area Temuan <span>*</span></label>
+              <select id="area" required onchange="saveDraft()">
+                <option value="">-- Pilih Area --</option>
+                <option value="Gudang Bahan Baku">Gudang Bahan Baku</option>
+                <option value="Gudang Barang Jadi">Gudang Barang Jadi</option>
+                <option value="Area Produksi Line 1">Area Produksi Line 1</option>
+                <option value="Area Produksi Line 2">Area Produksi Line 2</option>
+                <option value="Panel Room / Utility">Panel Room / Utility</option>
+                <option value="Workshop Maintenance">Workshop Maintenance</option>
+                <option value="Kantor Engineering">Kantor Engineering</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-grid-3">
+            <div class="input-group">
+              <label for="kategori"><i class="fa-solid fa-tags"></i> Kategori 5R <span>*</span></label>
+              <select id="kategori" required onchange="saveDraft()">
+                <option value="">-- Pilih Kategori --</option>
+                <option value="Ringkas (Seiri)">Ringkas (Seiri)</option>
+                <option value="Rapi (Seiton)">Rapi (Seiton)</option>
+                <option value="Resik (Seiso)">Resik (Seiso)</option>
+                <option value="Rawat (Seiketsu)">Rawat (Seiketsu)</option>
+                <option value="Rajin (Shitsuke)">Rajin (Shitsuke)</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label for="urgensi"><i class="fa-solid fa-triangle-exclamation"></i> Urgensi / Red Tag <span>*</span></label>
+              <select id="urgensi" required onchange="saveDraft()">
+                <option value="Low">Low (Biasa)</option>
+                <option value="Medium" selected>Medium (Sedang)</option>
+                <option value="High / Danger">High / Danger (Bersetifikat Red Tag)</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label for="targetDate"><i class="fa-solid fa-hourglass-half"></i> Target Selesai (Due Date) <span>*</span></label>
+              <input type="date" id="targetDate" required onchange="saveDraft()">
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="deskripsi"><i class="fa-solid fa-align-left"></i> Deskripsi Temuan & Rencana Tindakan <span>*</span></label>
+            <textarea id="deskripsi" rows="3" placeholder="Tuliskan detail ketidaksesuaian serta tindakan perbaikan yang disarankan..." required onkeyup="saveDraft()"></textarea>
+          </div>
+
+          <div class="form-grid">
+            <div class="input-group">
+              <label><i class="fa-solid fa-camera"></i> Foto BEFORE (Sebelum) <span>*</span></label>
+              <div class="file-dropzone" onclick="document.getElementById('fotoBefore').click()">
+                <input type="file" id="fotoBefore" accept="image/*" hidden required onchange="previewImage(this, 'previewBefore', 'labelBefore')">
+                <i class="fa-solid fa-cloud-arrow-up icon-upload"></i>
+                <span id="labelBefore">Klik/Pilih Foto Before</span>
+                <img id="previewBefore" class="img-preview" alt="Preview Before">
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label><i class="fa-solid fa-camera-rotate"></i> Foto AFTER (Sesudah)</label>
+              <div class="file-dropzone" onclick="document.getElementById('fotoAfter').click()">
+                <input type="file" id="fotoAfter" accept="image/*" hidden onchange="previewImage(this, 'previewAfter', 'labelAfter')">
+                <i class="fa-solid fa-cloud-arrow-up icon-upload"></i>
+                <span id="labelAfter">Klik/Pilih Foto After (Opsional)</span>
+                <img id="previewAfter" class="img-preview" alt="Preview After">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="input-group">
+              <label for="nama"><i class="fa-solid fa-user-gear"></i> Nama Auditor / Pelapor <span>*</span></label>
+              <input type="text" id="nama" placeholder="Masukkan nama auditor" required onkeyup="saveDraft()">
+            </div>
+            <div class="input-group">
+              <label for="picArea"><i class="fa-solid fa-user-check"></i> PIC Penanggung Jawab Area <span>*</span></label>
+              <input type="text" id="picArea" placeholder="Masukkan nama PIC Area" required onkeyup="saveDraft()">
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary">
+            <i class="fa-solid fa-paper-plane"></i> SUBMIT LAPORAN 5R
+          </button>
+        </form>
+      </section>
+    </div>
+
+    <!-- TAB 3: PANDUAN VISUAL & MOCKUP 5R -->
+    <div id="tabPanduan" class="tab-content">
+      <section class="card-data">
+        <div class="card-header">
+          <h3><i class="fa-solid fa-images" style="color: #0284c7;"></i> Standar Visual 5R Manufaktur (Before vs After)</h3>
+        </div>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 20px;">Gunakan panduan visual di bawah ini sebagai acuan penilaian saat melalukan audit inspeksi harian di area kerja.</p>
+
+        <div class="guide-cards-container">
+          
+          <!-- 1. RINGKAS -->
+          <div class="guide-card">
+            <div class="guide-header bg-ringkas">
+              <h4>1. RINGKAS (SEIRI) - Pemilahan Barang</h4>
+            </div>
+            <div class="guide-body">
+              <div class="guide-comparison">
+                <div class="comp-box bad">
+                  <span class="comp-badge badge-bad"><i class="fa-solid fa-xmark"></i> NON-STANDARD (BEFORE)</span>
+                  <img src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=400&q=80" alt="Ringkas Bad">
+                  <p>Barang tak terpakai, kardus bekas, dan komponen rusak menumpuk mencampur di area kerja.</p>
+                </div>
+                <div class="comp-box good">
+                  <span class="comp-badge badge-good"><i class="fa-solid fa-check"></i> STANDARD (AFTER)</span>
+                  <img src="https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=400&q=80" alt="Ringkas Good">
+                  <p>Hanya tersisa perkakas aktif. Barang rusak diberi Red Tag dan dipindahkan ke karantina.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. RAPI -->
+          <div class="guide-card">
+            <div class="guide-header bg-rapi">
+              <h4>2. RAPI (SEITON) - Penataan & Visual Control</h4>
+            </div>
+            <div class="guide-body">
+              <div class="guide-comparison">
+                <div class="comp-box bad">
+                  <span class="comp-badge badge-bad"><i class="fa-solid fa-xmark"></i> NON-STANDARD (BEFORE)</span>
+                  <img src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=400&q=80" alt="Rapi Bad">
+                  <p>Peralatan berserakan tanpa label, kabel terurai di lantai dan membahayakan akses jalan.</p>
+                </div>
+                <div class="comp-box good">
+                  <span class="comp-badge badge-good"><i class="fa-solid fa-check"></i> STANDARD (AFTER)</span>
+                  <img src="https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?w=400&q=80" alt="Rapi Good">
+                  <p>Toolbox diletakkan pada shadow board, garis marka lantai jelas, & kabel tray tertutup rapi.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. RESIK -->
+          <div class="guide-card">
+            <div class="guide-header bg-resik">
+              <h4>3. RESIK (SEISO) - Pembersihan & Pemeriksaan</h4>
+            </div>
+            <div class="guide-body">
+              <div class="guide-comparison">
+                <div class="comp-box bad">
+                  <span class="comp-badge badge-bad"><i class="fa-solid fa-xmark"></i> NON-STANDARD (BEFORE)</span>
+                  <img src="https://images.unsplash.com/photo-1617788138017-80ad40651399?w=400&q=80" alt="Resik Bad">
+                  <p>Debu tebal, ceceran pelumas/oli di bawah mesin, dan bekas geram pemotongan bertebaran.</p>
+                </div>
+                <div class="comp-box good">
+                  <span class="comp-badge badge-good"><i class="fa-solid fa-check"></i> STANDARD (AFTER)</span>
+                  <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&q=80" alt="Resik Good">
+                  <p>Lantai mengkilap, body mesin bersih bebas minyak, dan penampung oli terpasang presisi.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. RAWAT & RAJIN -->
+          <div class="guide-card">
+            <div class="guide-header bg-rawat">
+              <h4>4. RAWAT & RAJIN (SEIKETSU & SHITSUKE) - Standarisasi & Habit</h4>
+            </div>
+            <div class="guide-body">
+              <div class="guide-comparison">
+                <div class="comp-box bad">
+                  <span class="comp-badge badge-bad"><i class="fa-solid fa-xmark"></i> NON-STANDARD (BEFORE)</span>
+                  <img src="https://images.unsplash.com/photo-1581092162384-8987c1d64718?w=400&q=80" alt="Rawat Bad">
+                  <p>SOP 5R tidak dipajang, ceklis harian tidak diisi, danAPD tidak dipakai sesuai kriteria.</p>
+                </div>
+                <div class="comp-box good">
+                  <span class="comp-badge badge-good"><i class="fa-solid fa-check"></i> STANDARD (AFTER)</span>
+                  <img src="https://images.unsplash.com/photo-1581092334651-ddf26d9a09d0?w=400&q=80" alt="Rawat Good">
+                  <p>Papan kontrol 5R ter-update, briefing audit harian berjalan rutin, & APD lengkap.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+    </div>
+
+    <!-- TAB 4: RED TAG SYSTEM -->
+    <div id="tabRedTag" class="tab-content">
+      <section class="card-data">
+        <div class="card-header">
+          <h3><i class="fa-solid fa-tag" style="color: #dc2626;"></i> Generator Label Red Tag Fisik Karantina</h3>
+        </div>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Gunakan generator ini untuk mencetak label Red Tag fisik yang siap digantungkan pada mesin, alat, atau komponen rusak di area karantina.</p>
+        
+        <div class="form-grid-3" style="background: rgba(220, 38, 38, 0.05); padding: 15px; border-radius: 8px; border: 1px dashed #dc2626;">
+          <div class="input-group">
+            <label>Nama Barang / Alat</label>
+            <input type="text" id="rtNamaBarang" placeholder="Contoh: Motor Pump 3KW Rusak">
+          </div>
+          <div class="input-group">
+            <label>Jumlah / Satuan</label>
+            <input type="text" id="rtJumlah" placeholder="Contoh: 1 Unit">
+          </div>
+          <div class="input-group">
+            <label>Alasan Red Tag</label>
+            <input type="text" id="rtAlasan" placeholder="Contoh: Konsleting / Bocor">
+          </div>
+        </div>
+        <button onclick="generatePhysicalRedTag()" class="btn-pdf" style="margin-top: 10px; width: 100%; background: #dc2626;"><i class="fa-solid fa-print"></i> CETAK STIKER RED TAG PDF</button>
+      </section>
+    </div>
+
+    <!-- TAB 5: REKAPAN DATA -->
+    <div id="tabRekapan" class="tab-content">
+      <section class="card-data">
+        <div class="card-header flex-header">
+          <h3><i class="fa-solid fa-table-list"></i> Rekapan Temuan Laporan</h3>
+          <div class="action-buttons">
+            <button onclick="exportToExcel()" class="btn-excel"><i class="fa-solid fa-file-excel"></i> Excel</button>
+            <button onclick="exportToCSV()" class="btn-csv"><i class="fa-solid fa-file-csv"></i> CSV</button>
+            <button onclick="exportToPDF()" class="btn-pdf"><i class="fa-solid fa-file-pdf"></i> Cetak PDF</button>
+            <button onclick="clearAllData()" class="btn-clear"><i class="fa-solid fa-trash-can"></i> Reset</button>
+          </div>
+        </div>
+
+        <div class="filter-toolbar">
+          <input type="text" id="searchInput" placeholder="🔍 Cari area / deskripsi / auditor / PIC / Dept..." onkeyup="filterTable()">
+          <input type="date" id="filterDate" onchange="filterTable()">
+          <select id="statusFilter" onchange="filterTable()">
+            <option value="ALL">Semua Status</option>
+            <option value="OPEN">Hanya OPEN</option>
+            <option value="CLOSED">Hanya CLOSED</option>
+          </select>
+        </div>
+
+        <div id="printArea" class="table-responsive">
+          <table class="custom-table" id="table5R">
+            <thead>
+              <tr>
+                <th>Tgl / Due</th>
+                <th>Status</th>
+                <th>Urgensi</th>
+                <th>Dept & Area</th>
+                <th>Kategori</th>
+                <th>Deskripsi Temuan</th>
+                <th>Before</th>
+                <th>After</th>
+                <th>Auditor / PIC</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="dataBody">
+              <tr id="emptyRow">
+                <td colspan="10" class="text-center">Belum ada temuan yang diinput.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <!-- TAB 6: DASHBOARD ANALYTICS -->
+    <div id="tabDashboard" class="tab-content">
+      <section class="kpi-grid">
+        <div class="kpi-card border-blue">
+          <div class="kpi-info">
+            <span>Total Laporan</span>
+            <h3 id="statTotal">0</h3>
+          </div>
+          <i class="fa-solid fa-clipboard-list kpi-icon text-blue"></i>
+        </div>
+        <div class="kpi-card border-red">
+          <div class="kpi-info">
+            <span>Temuan OPEN</span>
+            <h3 id="statOpen">0</h3>
+          </div>
+          <i class="fa-solid fa-triangle-exclamation kpi-icon text-red"></i>
+        </div>
+        <div class="kpi-card border-green">
+          <div class="kpi-info">
+            <span>Temuan CLOSED</span>
+            <h3 id="statClosed">0</h3>
+          </div>
+          <i class="fa-solid fa-circle-check kpi-icon text-green"></i>
+        </div>
+        <div class="kpi-card border-gold">
+          <div class="kpi-info">
+            <span>Score Compliance</span>
+            <h3 id="statScore">0%</h3>
+          </div>
+          <i class="fa-solid fa-award kpi-icon text-gold"></i>
+        </div>
+      </section>
+
+      <section class="card-data" style="margin-top: 20px;">
+        <div class="card-header">
+          <h3><i class="fa-solid fa-chart-pie"></i> Visualisasi Status & Kategori</h3>
+          <button onclick="exportToPDF()" class="btn-pdf" style="font-size: 11px;"><i class="fa-solid fa-print"></i> Executive Report</button>
+        </div>
+        <div class="charts-grid">
+          <div class="chart-box">
+            <h4>Proporsi Status (Open vs Closed)</h4>
+            <div class="chart-container">
+              <canvas id="statusChart"></canvas>
+            </div>
+          </div>
+          <div class="chart-box">
+            <h4>Distribusi Kategori 5R</h4>
+            <div class="chart-container">
+              <canvas id="kategoriChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+  </main>
+
+  <!-- MODAL CLOSE TEMUAN -->
+  <div id="closeModal" class="modal">
+    <div class="modal-card">
+      <h3><i class="fa-solid fa-camera-rotate"></i> Update Foto After (Close Temuan)</h3>
+      <p id="closeAreaText" style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;"></p>
+      <input type="file" id="modalFotoAfterInput" accept="image/*" onchange="previewModalImage(this)">
+      <img id="modalPreviewImg" class="img-preview" style="margin-top: 10px; width: 100%; max-height: 150px; object-fit: cover;">
+      <div style="display: flex; gap: 10px; margin-top: 15px;">
+        <button onclick="submitCloseAction()" class="btn-primary">Simpan & Close</button>
+        <button onclick="closeModalAction()" class="btn-clear">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL WA TEXT SHARE -->
+  <div id="waModal" class="modal">
+    <div class="modal-card">
+      <h3><i class="fa-brands fa-whatsapp" style="color: #16a34a;"></i> Text Broadcast WA</h3>
+      <textarea id="waTextContent" rows="6" style="width: 100%; margin-top: 10px; font-size: 11px;"></textarea>
+      <div style="display: flex; gap: 10px; margin-top: 15px;">
+        <button onclick="copyWaText()" class="btn-primary"><i class="fa-solid fa-copy"></i> Copy Teks</button>
+        <button onclick="closeWaModal()" class="btn-clear">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PRINT SINGLE TAG 5R -->
+  <div id="singleTagModal" class="modal">
+    <div class="modal-card" style="max-width: 500px;">
+      <div id="singleTagPrintArea" class="tag-card">
+        <div class="tag-header">
+          <img src="logo-lelco.png" style="height: 25px; background: white; padding: 2px 6px; border-radius: 4px;">
+          <h4>LEMBAR TEMUAN INSPEKSI 5R</h4>
+        </div>
+        <table class="tag-table">
+          <tr><td><strong>Tanggal:</strong> <span id="tagTanggal"></span></td><td><strong>Target:</strong> <span id="tagTarget"></span></td></tr>
+          <tr><td><strong>Dept:</strong> <span id="tagDept"></span></td><td><strong>Area:</strong> <span id="tagArea"></span></td></tr>
+          <tr><td><strong>Kategori:</strong> <span id="tagKategori"></span></td><td><strong>Urgensi:</strong> <span id="tagUrgensi"></span></td></tr>
+          <tr><td><strong>Auditor:</strong> <span id="tagAuditor"></span></td><td><strong>PIC Area:</strong> <span id="tagPic"></span></td></tr>
+          <tr><td colspan="2"><strong>Deskripsi:</strong> <span id="tagDeskripsi"></span></td></tr>
+        </table>
+        <div class="tag-photos">
+          <div><p>BEFORE</p><img id="tagImgBefore" class="tag-img"></div>
+          <div><p>AFTER</p><img id="tagImgAfter" class="tag-img"></div>
+        </div>
+        <div class="tag-footer">
+          <div>Auditor: ____________</div>
+          <div>PIC Area: ____________</div>
+        </div>
+      </div>
+      <div style="display: flex; gap: 10px; margin-top: 15px;">
+        <button onclick="printSingleTagPDF()" class="btn-primary"><i class="fa-solid fa-print"></i> Cetak Tag PDF</button>
+        <button onclick="closeSingleTagModal()" class="btn-clear">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL ZOOM FOTO -->
+  <div id="imageModal" class="modal" onclick="closeZoomModal()">
+    <span class="close-modal">&times;</span>
+    <img class="modal-content" id="imgModalTarget">
+  </div>
+
+  <div id="redTagPrintContainer" style="display:none;"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
